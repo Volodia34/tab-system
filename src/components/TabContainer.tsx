@@ -3,21 +3,29 @@ import update from 'immutability-helper';
 import DraggableTab from './DraggableTab';
 import './TabContainer.css';
 
+interface Tab {
+    id: string;
+    title: string;
+    url: string;
+    pinned: boolean;
+}
+
 const TabContainer: React.FC = () => {
-    const [tabs, setTabs] = useState([
+    const initialTabs: Tab[] = JSON.parse(localStorage.getItem('tabs') || '[]') || [
         { id: '1', title: 'Dashboard', url: '/dashboard', pinned: true },
         { id: '2', title: 'Accounting', url: '/accounting', pinned: false },
         { id: '3', title: 'Sales', url: '/sales', pinned: false },
         { id: '4', title: 'Statistics', url: '/statistics', pinned: false },
         { id: '5', title: 'Post Office', url: '/post-office', pinned: false },
         // other tabs...
-    ]);
+    ];
 
-    const [overflowTabs, setOverflowTabs] = useState([]);
+    const [tabs, setTabs] = useState<Tab[]>(initialTabs);
+    const [overflowTabs, setOverflowTabs] = useState<Tab[]>([]);
     const containerRef = useRef<HTMLDivElement>(null);
 
     const moveTab = useCallback((dragIndex: number, hoverIndex: number) => {
-        setTabs((prevTabs) =>
+        setTabs((prevTabs: Tab[]) =>
             update(prevTabs, {
                 $splice: [
                     [dragIndex, 1],
@@ -28,7 +36,7 @@ const TabContainer: React.FC = () => {
     }, []);
 
     const pinTab = (index: number) => {
-        setTabs((prevTabs) =>
+        setTabs((prevTabs: Tab[]) =>
             update(prevTabs, {
                 [index]: { $merge: { pinned: true } },
             })
@@ -36,12 +44,16 @@ const TabContainer: React.FC = () => {
     };
 
     const unpinTab = (index: number) => {
-        setTabs((prevTabs) =>
+        setTabs((prevTabs: Tab[]) =>
             update(prevTabs, {
                 [index]: { $merge: { pinned: false } },
             })
         );
     };
+
+    useEffect(() => {
+        localStorage.setItem('tabs', JSON.stringify(tabs));
+    }, [tabs]);
 
     useEffect(() => {
         const handleResize = () => {
@@ -58,7 +70,6 @@ const TabContainer: React.FC = () => {
                         break;
                     }
                 }
-                // @ts-ignore
                 setOverflowTabs(tabs.slice(lastVisibleIndex));
             }
         };
@@ -90,7 +101,7 @@ const TabContainer: React.FC = () => {
                 <div className="tab-dropdown">
                     <button className="dropdown-button">...</button>
                     <div className="dropdown-content">
-                        {overflowTabs.map((tab: any, index) => (
+                        {overflowTabs.map((tab, index) => (
                             <div key={tab.id} className="dropdown-tab">
                                 {tab.title}
                             </div>
