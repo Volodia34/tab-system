@@ -2,7 +2,7 @@ import React from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import Tab from './Tab';
 
-interface DraggableTab {
+interface DraggableTabProps {
     id: string;
     index: number;
     moveTab: (dragIndex: number, hoverIndex: number) => void;
@@ -12,21 +12,26 @@ interface DraggableTab {
     onClick: () => void;
     onPin: () => void;
     onUnpin: () => void;
+    onClose: () => void;
 }
 
-const DraggableTab: React.FC<DraggableTab> = ({ id, index, moveTab, ...props }) => {
+const DraggableTab: React.FC<DraggableTabProps> = ({ id, index, moveTab, ...props }) => {
     const ref = React.useRef<HTMLDivElement>(null);
+
     const [, drop] = useDrop({
         accept: 'TAB',
         hover(item: { index: number }) {
             if (!ref.current) {
                 return;
             }
+
             const dragIndex = item.index;
             const hoverIndex = index;
+
             if (dragIndex === hoverIndex) {
                 return;
             }
+
             moveTab(dragIndex, hoverIndex);
             item.index = hoverIndex;
         },
